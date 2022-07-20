@@ -246,7 +246,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // Create soul shard (only on non-worldboss)
     uint8 freeSpace = m_ai.GetFreeBagSpace();
     uint8 HPThreshold = (m_ai.IsElite(pTarget) ? 10 : 25);
-    if (!m_ai.IsElite(pTarget, true) && pTarget->GetHealthPercent() < HPThreshold && (shardCount < MAX_SHARD_COUNT && freeSpace > 0))
+    if (!m_ai.IsElite(pTarget, true) && pTarget->GetHealthPercent() < HPThreshold && (shardCount < MAX_SHARD_COUNT && freeSpace > 15))
     {
         if (SHADOWBURN && m_ai.In_Reach(pTarget, SHADOWBURN) && !pTarget->HasAura(SHADOWBURN) && m_bot.IsSpellReady(SHADOWBURN) && CastSpell(SHADOWBURN, pTarget))
             return RETURN_CONTINUE;
