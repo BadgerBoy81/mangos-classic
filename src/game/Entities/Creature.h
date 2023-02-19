@@ -167,6 +167,8 @@ struct CreatureInfo
     uint32  StringID2;
     uint32  EquipmentTemplateId;
     uint32  Civilian;
+    uint32  StringID1;
+    uint32  StringID2;
     char const* AIName;
     uint32  ScriptID;
 
