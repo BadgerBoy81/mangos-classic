@@ -1554,6 +1554,9 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     if (!entry && eventData)
         entry = eventData->entry_id;
 
+    if (!entry)
+        return false;
+
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(entry);
     if (!cinfo)
     {
