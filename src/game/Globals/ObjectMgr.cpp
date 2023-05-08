@@ -50,6 +50,10 @@
 #include "Loot/LootMgr.h"
 #include "World/WorldState.h"
 
+#include "Globals/UnitCondition.h"
+#include "Globals/CombatCondition.h"
+#include "World/WorldStateExpression.h"
+
 #include <limits>
 #include <cstdarg>
 
