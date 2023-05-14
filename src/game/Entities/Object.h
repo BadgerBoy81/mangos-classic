@@ -1185,8 +1185,6 @@ class WorldObject : public Object
     protected:
         explicit WorldObject();
 
-        void SetStringId(uint32 stringId, bool apply);
-
         // these functions are used mostly for Relocate() and Corpse/Player specific stuff...
         // use them ONLY in LoadFromDB()/Create() funcs and nowhere else!
         // mapId/instanceId should be set in SetMap() function!
