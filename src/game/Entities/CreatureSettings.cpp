@@ -125,6 +125,9 @@ void CreatureSettings::updateFlag(CreatureStaticFlags flag, bool apply)
         case CreatureStaticFlags::SESSILE:
             m_owner->AI()->SetAIImmobilizedState(apply);
             break;
+        case CreatureStaticFlags::NO_MELEE_FLEE:
+            m_owner->AI()->SetMeleeEnabled(!apply);
+            break;
     }
 }
 
