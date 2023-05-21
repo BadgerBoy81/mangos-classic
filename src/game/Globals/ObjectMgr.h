@@ -38,10 +38,7 @@
 #include <climits>
 #include <memory>
 #include <tuple>
-<<<<<<< HEAD
 #include <optional>
-=======
->>>>>>> d7ff7e15a ([z2810] Implement UnitCondition, CombatCondition and WorldstateExpression and integrate into spell lists)
 
 class Group;
 class Item;
