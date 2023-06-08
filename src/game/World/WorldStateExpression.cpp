@@ -379,11 +379,7 @@ bool EvalRelOp(ByteBuffer& buffer, Map const* map)
 
     int32 rightValue = EvalValue(buffer, map);
 
-    return ConditionEntry::CheckOp(compareLogic, leftValue, rightValue);
 }
-
-std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> WorldStateExpressionMgr::Load()
-{
     auto expressions = std::make_shared<std::map<int32, WorldStateExpressionEntry>>();
 
     std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT * FROM worldstate_expression"));
