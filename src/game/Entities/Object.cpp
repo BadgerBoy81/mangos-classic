@@ -1959,6 +1959,10 @@ void WorldObject::RemoveFromWorld()
                 m_currMap->RemoveStringIdObject(stringId, this);
     }
 
+    if (!m_stringIds.empty())
+        for (uint32 stringId : m_stringIds)
+            m_currMap->RemoveStringIdObject(stringId, this);
+
     Object::RemoveFromWorld();
 }
 

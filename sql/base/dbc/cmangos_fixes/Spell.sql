@@ -295,7 +295,6 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WH
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 4044,  -- Target Dummy Passive
 4133,  -- Bruise
-5301,  -- Defensive State (DND)
 6742,  -- Bloodlust
 8852,  -- Moss Hide
 11816, -- Land Mine Arming
@@ -308,7 +307,6 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 18163, -- Strength of Arko'narin
 18167, -- Holy Fire
 21080, -- Putrid Breath
-23378, -- Magma Splash
 27791, -- Suicide (Suicide)
 21789, -- Hate to Half (Hate to Half)
 28330  -- Flameshocker - Immolate Visual
