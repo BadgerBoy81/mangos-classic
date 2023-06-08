@@ -1375,8 +1375,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 				sLog.outError("Loot error, wont release");
 				return;
 			}
-            p >> gold;      // 4 gold
-            p >> items;     // 1 items count
 
             if (loot_type != 0)
             {
