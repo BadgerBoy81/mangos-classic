@@ -3711,7 +3711,7 @@ float Unit::CalculateEffectiveMissChance(const Unit *victim, WeaponAttackType at
     // a) Victim's level is higher
     // b) Victim has additional defense skill bonuses
     const bool vsPlayerOrPet = victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetSkillMaxForLevel(victim));
+    const uint32 skill = GetWeaponSkillValue(attType, victim);
     int32 difference = int32(victim->GetDefenseSkillValue(this) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
