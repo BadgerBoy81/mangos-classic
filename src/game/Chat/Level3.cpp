@@ -1014,6 +1014,7 @@ bool ChatHandler::HandleReloadCreatureSpellLists(char* /*args*/)
     sLog.outString("Reloading creature spell lists...");
     auto conditionsAndExpressions = sObjectMgr.LoadConditionsAndExpressions();
     auto result = sObjectMgr.LoadCreatureSpellLists();
+    sObjectMgr.LoadCreatureTemplateSpells(result);
     auto [unitConditions, worldstateExpressions, combatConditions] = conditionsAndExpressions;
     SendGlobalSysMessage("Reloaded creature spell lists.");
     if (result)
@@ -4759,6 +4760,11 @@ bool ChatHandler::HandleQuestAddCommand(char* args)
         if (player->CanCompleteQuest(entry))
             player->CompleteQuest(entry);
     }
+
+    if (!player->SatisfyQuestClass(pQuest, false))
+        SendSysMessage("Warning: Added quest to player who does not fulfill class requirement. Might not work correctly.");
+    if (!player->SatisfyQuestRace(pQuest, false))
+        SendSysMessage("Warning: Added quest to player who does not fulfill race requirement. Might not work correctly.");
 
     return true;
 }

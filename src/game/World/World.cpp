@@ -986,13 +986,13 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadConditionsAndExpressions();
 
     sLog.outString("Loading Creature spell lists...");
-    sObjectMgr.LoadCreatureSpellLists();
+    auto spellLists = sObjectMgr.LoadCreatureSpellLists();
 
     sLog.outString("Loading Creature cooldowns...");
     sObjectMgr.LoadCreatureCooldowns();
 
     sLog.outString("Loading Creature template spells...");
-    sObjectMgr.LoadCreatureTemplateSpells();
+    sObjectMgr.LoadCreatureTemplateSpells(spellLists);
 
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();
@@ -2545,7 +2545,7 @@ uint32 World::GetAverageLatency() const
         return 0;
 
     uint32 result = 0;
-    const_cast<World*>(this)->ExecuteForAllSessions([&](WorldSession const& session)
+    ExecuteForAllSessions([&](WorldSession const& session)
     {
         result += session.GetLatency();
     });

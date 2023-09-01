@@ -2575,11 +2575,12 @@ TimePoint WorldObject::GetGCD(SpellEntry const* spellEntry) const
     return GetMap()->GetCurrentClockTime();
 }
 
-void WorldObject::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto = nullptr*/, bool /*permanent = false*/, uint32 forcedDuration /*= 0*/)
+void WorldObject::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto = nullptr*/, bool /*permanent = false*/, uint32 forcedDuration /*= 0*/, bool ignoreCat /*= false*/)
 {
     uint32 recTimeDuration = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
-    if (recTimeDuration || spellEntry.CategoryRecoveryTime)
-        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTimeDuration, spellEntry.Category, spellEntry.CategoryRecoveryTime);
+    uint32 catTimeDuration = ignoreCat ? 0 : spellEntry.CategoryRecoveryTime;
+    if (recTimeDuration || catTimeDuration)
+        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTimeDuration, spellEntry.Category, catTimeDuration);
 }
 
 void WorldObject::UpdateCooldowns(TimePoint const& now)
@@ -2980,6 +2981,23 @@ float Position::GetDistance(Position const& other) const
     distsq += dz * dz;
 
     return distsq;
+}
+
+float Position::GetDistance2d(Position const& other) const
+{
+    float dx = GetPositionX() - other.GetPositionX();
+    float dy = GetPositionY() - other.GetPositionY();
+    float distsq = dx * dx + dy * dy;
+
+    return distsq;
+}
+
+void Position::RelocateOffset(Position const& offset)
+{
+    x = GetPositionX() + (offset.GetPositionX() * std::cos(GetPositionO()) + offset.GetPositionY() * std::sin(GetPositionO() + float(M_PI)));
+    y = GetPositionY() + (offset.GetPositionY() * std::cos(GetPositionO()) + offset.GetPositionX() * std::sin(GetPositionO()));
+    z = GetPositionZ() + offset.GetPositionZ();
+    o = GetPositionO() + offset.GetPositionO();
 }
 
 std::string Position::to_string() const

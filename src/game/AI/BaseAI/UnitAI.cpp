@@ -103,7 +103,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
 
 void UnitAI::EnterCombat(Unit*)
 {
-    if (!GetSpellList().Spells.empty())
+    if (!GetSpellList().Disabled && !GetSpellList().Spells.empty())
     {
         m_spellListCooldown = false;
         AddInitialCooldowns();
@@ -1161,9 +1161,17 @@ bool UnitAI::IsEligibleForDistancing() const
 
 void UnitAI::SpellListChanged()
 {
+    m_mainSpellId = 0;
+    m_mainSpellCost = 0;
+    m_mainSpellMinRange = 0;
+    m_mainAttackMask = SPELL_SCHOOL_MASK_NONE;
+    m_mainSpellInfo = nullptr;
+    m_mainSpells.clear();
+
     CreatureSpellList const& spells = GetSpellList();
     if (spells.Disabled)
         return;
+
     for (auto& data : spells.Spells)
     {
         if (data.second.Flags & SPELL_LIST_FLAG_RANGED_ACTION)
@@ -1348,7 +1356,7 @@ void UnitAI::AddInitialCooldowns()
         if (cooldown)
         {
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(data.second.SpellId);
-            m_unit->AddCooldown(*spellInfo, nullptr, false, cooldown);
+            m_unit->AddCooldown(*spellInfo, nullptr, false, cooldown, true);
         }
     }
 }

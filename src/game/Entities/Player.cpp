@@ -5592,7 +5592,7 @@ void Player::UpdateSkillTrainedSpells(uint16 id, uint16 currVal)
             // Update training: skill removal mode, wipe all dependent spells regardless of training method
             if (!currVal)
             {
-                removeSpell(pAbility->spellId, false, false, false);
+                removeSpell(pAbility->spellId, false, false, true);
                 continue;
             }
 
@@ -16601,7 +16601,7 @@ void Player::PetSpellInitialize() const
 
     data.put<uint8>(spellsCountPos, addlist);
 
-    CharmCooldownInitialize(data);
+    pet->CharmCooldownInitialize(data);
 
     GetSession()->SendPacket(data);
 }
@@ -19972,11 +19972,11 @@ void Player::AddGCD(SpellEntry const& spellEntry, uint32 /*forcedDuration = 0*/,
     GetSession()->SendPacket(data);
 }
 
-void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/, bool permanent /*= false*/, uint32 forcedDuration /*= 0*/)
+void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/, bool permanent /*= false*/, uint32 forcedDuration /*= 0*/, bool ignoreCat /*= false*/)
 {
     uint32 spellCategory = spellEntry.Category;
     uint32 recTime = spellEntry.RecoveryTime; // int because of spellmod calculations
-    uint32 categoryRecTime = spellEntry.CategoryRecoveryTime; // int because of spellmod calculations
+    uint32 categoryRecTime = ignoreCat ? 0 : spellEntry.CategoryRecoveryTime; // int because of spellmod calculations
     uint32 itemId = 0;
 
     auto pickCooldowns = [&](ItemPrototype const* itemProto)

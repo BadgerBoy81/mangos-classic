@@ -282,9 +282,14 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 6742,  -- Bloodlust
 8852,  -- Moss Hide
 11816, -- Land Mine Arming
+11966, -- Fire Shield
+12896, -- Helboar
+12898, -- Smoke Aura Visual
 13879, -- Magma Splash
 17205, -- Winterfall Firewater
 18115, -- Viewing Room Student Transform
+18163, -- Strength of Arko'narin
+18167, -- Holy Fire
 23378, -- Magma Splash
 27791, -- Suicide (Suicide)
 21789, -- Hate to Half (Hate to Half)
@@ -293,5 +298,9 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 
 -- Stop interrupt on damage taken for these 2 spells
 UPDATE `spell_template` SET `InterruptFlags` = 15 WHERE `Id` in (8016,7901);
+
+-- require backstab to face back
+UPDATE spell_template SET AttributesServerside=AttributesServerside|0x00000008 WHERE Id IN(15582);
+UPDATE `spell_template` SET AttributesServerside=AttributesServerside|0x00000008 WHERE `Id` IN (7159,15582,15657,22416);
 
 
