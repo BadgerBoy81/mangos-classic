@@ -2234,12 +2234,12 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     // we already have a target and we are not forced to change it
     if (m_targetCombat)
     {
-        // This is a hack. For some reason the playerbots target is dereferenced between fetching it and trying to attack it.
+        // This is a hack. For some reasonmthe playerbots target is dereferenced between fetching it and trying to attack it.
         // The real solution would be to see if that could be avoided in a better way
         if (m_targetCombat->GetDbGuid() > 1000000)
         {
-            sLog.outString("Weird value combat target dbGuid: %i", m_targetCombat->GetDbGuid());
-            sLog.outString("setting combat target to nullptr");
+            //sLog.outString("Weird value combat target dbGuid: %i", m_targetCombat->GetDbGuid());
+            //sLog.outString("setting combat target to nullptr");
             m_targetCombat = nullptr;
             return;
         }
@@ -6789,7 +6789,7 @@ void PlayerbotAI::_HandleCommandOrders(std::string& text, Player& fromPlayer)
 
         if (text == "")
         {
-            SendWhisper("|cffff0000Syntax error:|cffffffff orders combat <botName> <reset | tank | heal | passive><assist | protect [targetPlayer]>", fromPlayer);
+            SendWhisper("|cffff0000Syntax error:|cffffffff orders combat <botName> <reset | tank | heal | passive | assist | protect [targetPlayer]>", fromPlayer);
             return;
         }
 

@@ -1222,6 +1222,49 @@ void Group::ChangeMembersGroup(ObjectGuid guid, uint8 group)
         ChangeMembersGroup(player, group);
 }
 
+bool Group::HasClass(uint32 allowedClass) const
+{
+    for (auto itr = this->GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        switch (itr->getSource()->getClass())
+        {
+        case 1:
+            if (allowedClass & 1) return true;
+            break;
+        case 2:
+            if (allowedClass & 2) return true;
+            break;
+        case 3:
+            if (allowedClass & 4) return true;
+            break;
+        case 4:
+            if (allowedClass & 8) return true;
+            break;
+        case 5:
+            if (allowedClass & 16) return true;
+            break;
+        case 7:
+            if (allowedClass & 64) return true;
+            break;
+        case 8:
+            if (allowedClass & 128) return true;
+            break;
+        case 9:
+            if (allowedClass & 256) return true;
+            break;
+        case 11:
+            if (allowedClass & 1024) return true;
+            break;
+        default:
+            sLog.outString("Group member is of unknown class: %i and loot is not allowed");
+            return false;
+        }
+    }
+
+    sLog.outString("Loot not lootable by any class in group");
+    return false;
+}
+
 // only for online members
 void Group::ChangeMembersGroup(Player* player, uint8 group)
 {
