@@ -20,6 +20,7 @@
 #include "Common.h"
 #include "Log.h"
 #include "Server/WorldPacket.h"
+#include "Server/DBCStores.h"
 #include "Database/DatabaseEnv.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotMgr.h"
@@ -4965,6 +4966,35 @@ void PlayerbotAI::extractTalentIds(const std::string& text, std::list<talentPair
     }
 }
 
+uint32 PlayerbotAI::extractEntryFromItemLink(const std::string& text) const
+{
+    uint8 pos = 0;
+    while (true)
+    {
+        // extract GO guid
+        int i = text.find("Hfound:", pos);     // base H = 11
+        if (i == -1)     // break if error
+            break;
+
+        pos = i + 7;     //start of window in text 11 + 7 = 18
+        int endPos = text.find(':', pos);     // end of window in text 22
+        if (endPos == -1)     //break if error
+            break;
+        std::string guidC = text.substr(pos, endPos - pos);     // get string within window i.e guid 22 - 18 =  4
+        uint32 guid = atol(guidC.c_str());     // convert ascii to long int
+
+        // extract GO entry
+        pos = endPos + 1;
+        endPos = text.find(':', pos);     // end of window in text
+        if (endPos == -1)     //break if error
+            break;
+
+        std::string entryC = text.substr(pos, endPos - pos);     // get string within window i.e entry
+        return atol(entryC.c_str());     // convert ascii to float
+    }
+    return -1;
+}
+
 void PlayerbotAI::extractGOinfo(const std::string& text, BotObjectList& m_lootTargets) const
 {
 
@@ -6593,6 +6623,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("get", input, true)) // true -> "get" OR "g"
         _HandleCommandGet(input, fromPlayer);
 
+    else if (ExtractCommand("activate", input, false)) // true -> "get" OR "g"
+        _HandleCommandActivate(input, fromPlayer);
+
     // Handle all collection related commands here
     else if (ExtractCommand("collect", input))
         _HandleCommandCollect(input, fromPlayer);
@@ -7207,6 +7240,7 @@ void PlayerbotAI::_HandleCommandUse(std::string& text, Player& fromPlayer)
     std::list<uint32> itemIds;
     std::list<Item*> itemList;
     extractItemIds(text, itemIds);
+    findItemsInEquip(itemIds, itemList);
     findItemsInInv(itemIds, itemList);
     // set target
     Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
@@ -7289,6 +7323,30 @@ void PlayerbotAI::_HandleCommandGet(std::string& text, Player& fromPlayer)
     {
         SendWhisper("No target is selected.", fromPlayer);
         m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+    }
+}
+
+void PlayerbotAI::_HandleCommandActivate(std::string& text, Player& fromPlayer)
+{
+    uint32 goEntry = extractEntryFromItemLink(text);
+    extractGOinfo(text, m_lootTargets);
+    GameObject* target = m_bot->GetMap()->GetGameObject(m_lootTargets.front());
+    switch (target->GetGoType())
+    {
+        case GAMEOBJECT_TYPE_DOOR:
+            LockEntry const* lockInfo = sLockStore.LookupEntry(target->GetGOInfo()->door.lockId);
+            //auto goInfo = ObjectMgr::GetGameObjectInfo(goEntry);
+            m_bot->GetMotionMaster()->Clear(true);
+            std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_USE_ITEM, 13));
+            *packet << uint8(255);
+            *packet << uint8(87);
+            *packet << uint8(0);
+            *packet << uint16(TARGET_FLAG_GAMEOBJECT);
+            *packet << m_lootTargets.front().WriteAsPacked();
+
+            m_bot->GetSession()->QueuePacket(std::move(packet));
+
+            break;
     }
 }
 
