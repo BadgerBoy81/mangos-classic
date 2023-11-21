@@ -1593,7 +1593,8 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     m_respawnradius = data->spawndist;
 
     m_respawnDelay = data->GetRandomRespawnTime();
-    if (!IsUsingNewSpawningSystem())
+    bool isUsingNewSpawningSystem = IsUsingNewSpawningSystem();
+    if (!isUsingNewSpawningSystem)
         m_corpseDelay = std::min(m_respawnDelay * 9 / 10, m_corpseDelay); // set corpse delay to 90% of the respawn delay
     m_deathState = ALIVE;
 
@@ -1601,6 +1602,12 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
 
     if (m_respawnTime > time(nullptr))                         // not ready to respawn
     {
+        if (isUsingNewSpawningSystem && !group) // only at this point we know if marked as dynguid per entry
+        {
+            GetMap()->GetPersistentState()->RemoveCreatureFromGrid(GetDbGuid(), data);
+            GetMap()->GetSpawnManager().AddCreature(GetDbGuid());
+            return false;
+        }
         m_deathState = DEAD;
         SetHealth(0);
         if (CanFly())
@@ -1784,7 +1791,7 @@ void Creature::SetDeathState(DeathState s)
         {
             m_respawnTime = std::numeric_limits<time_t>::max();
             if (m_respawnDelay && s == JUST_DIED && !GetCreatureGroup())
-                GetMap()->GetSpawnManager().AddCreature(m_respawnDelay, GetDbGuid());
+                GetMap()->GetSpawnManager().AddCreature(GetDbGuid());
         }
     }
 
