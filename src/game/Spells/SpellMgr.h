@@ -555,6 +555,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
         case 9464:          // Barbs
+        case 9617:          // Ghost Visual
         case 9769:          // Radiation
         case 9941:          // Spell Reflection
         case 10022:         // Deadly Poison
@@ -619,6 +620,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 21862:         // Radiation
         case 22128:         // Thorns
         case 22578:         // Glowy (Black)
+        case 22650:         // Ghost Visual
         case 22735:         // Spirit of Runn Tum
         case 22781:         // Thornling
         case 22788:         // Grow
@@ -631,6 +633,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 27578:         // Battle Shout
         case 27793:         // Disease Cloud
         case 27987:         // Unholy Aura
+        case 28002:         // Ghost Visual
         case 28126:         // Spirit Particles (purple)
         case 28156:         // Disease Cloud
         case 28362:         // Disease Cloud
@@ -1434,7 +1437,12 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
     return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LINE_OF_SIGHT);
 }
 
-inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
+inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
+{
+    return spellInfo->rangeIndex == 13 || IsIgnoreLosSpell(spellInfo);
+}
+
+inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx, bool targetB)
 {
     // TODO: Move this to target logic
     switch (spellInfo->EffectImplicitTargetA[effIdx])
@@ -1443,15 +1451,13 @@ inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
         case TARGET_UNIT_FRIEND_AND_PARTY:
         case TARGET_UNIT_RAID_AND_CLASS:
         case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE: return true;
-        default: break;
+        default:
+            if (IsCheckCastTarget(targetB ? spellInfo->EffectImplicitTargetB[effIdx] : spellInfo->EffectImplicitTargetA[effIdx]))
+                return IsIgnoreLosSpellCast(spellInfo);
+            break;
     }
 
     return spellInfo->EffectRadiusIndex[effIdx] == 28 || IsIgnoreLosSpell(spellInfo);
-}
-
-inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
-{
-    return spellInfo->rangeIndex == 13 || IsIgnoreLosSpell(spellInfo);
 }
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
@@ -1513,6 +1519,12 @@ inline bool IsIgnoreRootSpell(SpellEntry const* spellInfo)
             return true;
 
     return false;
+}
+
+inline bool IsSpellUseWeaponSkill(SpellEntry const* spellInfo)
+{
+    // note: this is not a mirror of client function - that function does not work for Bloodthirst edgecase
+    return spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED && spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT);
 }
 
 inline uint32 GetDispellMask(DispelType dispel)
@@ -2050,15 +2062,15 @@ enum ProcFlagsEx
     PROC_EX_DEFLECT             = 0x0000200,
     PROC_EX_ABSORB              = 0x0000400,
     PROC_EX_REFLECT             = 0x0000800,
-    PROC_EX_INTERRUPT           = 0x0001000,                // Melee hit result can be Interrupt (not used)
+    PROC_EX_INTERRUPT           = 0x0001000,                // melee hit result can be Interrupt (not used)
     PROC_EX_RESERVED1           = 0x0002000,
     PROC_EX_RESERVED2           = 0x0004000,
     PROC_EX_RESERVED3           = 0x0008000,
-    PROC_EX_EX_TRIGGER_ALWAYS   = 0x0010000,                // If set trigger always ( no matter another flags) used for drop charges
-    PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,                // If set trigger always but only one time (not used)
-    PROC_EX_PERIODIC_POSITIVE   = 0x0040000,                // For periodic heal
+    PROC_EX_EX_TRIGGER_ON_NO_DAMAGE = 0x0010000,            // if set, hits trigger even if no damage/healing is dealt
+    PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,                // if set trigger always but only one time (not used)
+    PROC_EX_PERIODIC_POSITIVE   = 0x0040000,                // for periodic heal
     PROC_EX_CAST_END            = 0x0080000,                // procs on end of cast
-    PROC_EX_MAGNET              = 0x0100000,                // For grounding totem hit
+    PROC_EX_MAGNET              = 0x0100000,                // for grounding totem hit
 
     // Flags for internal use - do not use these in db!
     PROC_EX_INTERNAL_HOT        = 0x2000000

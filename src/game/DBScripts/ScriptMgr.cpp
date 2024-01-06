@@ -114,12 +114,12 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
     scripts.first = tablename;
     scripts.second.clear();                                 // need for reload support
 
-    //                                                                0   1      2        3         4          5          6            7              8           9        10        11        12               13 14 15 16 17     18            19
-    std::unique_ptr<QueryResult> result(WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, datafloat, x, y, z, o, speed, condition_id FROM %s ORDER BY priority", tablename));
+    //                                              0   1      2        3         4          5          6            7              8           9        10        11        12               13 14 15 16 17     18            19
+    auto queryResult = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, datafloat, x, y, z, o, speed, condition_id FROM %s ORDER BY priority", tablename);
 
     uint32 count = 0;
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -128,13 +128,13 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
         bar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         ScriptInfo tmp;
         tmp.id                 = fields[0].GetUInt32();
@@ -829,12 +829,15 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 switch (tmp.formationData.command)
                 {
                      case 150: // SetFormation
+                     {
                          if (tmp.textId[0] >= SpawnGroupFormationType::SPAWN_GROUP_FORMATION_TYPE_COUNT)
                          {
                              sLog.outErrorDb("Table `%s` uses invalid formation shape id(%u) for script id %u. Command[51], subcommand[%u]",
                                  tablename, tmp.textId[0], tmp.id, tmp.formationData.command);
                              continue;
                          }
+                         break;
+                     }
                      case 151: // Remove formation
                      {
                          auto const& spgCont = sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap;
@@ -940,6 +943,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     sLog.outErrorDb("Table `%s` has invalid apply (0 or 1) assigned %d", tablename, tmp.stringId.apply);
                     continue;
                 }
+                break;
             }
             default:
             {
@@ -967,7 +971,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
 
         ++count;
     }
-    while (result->NextRow());
+    while (queryResult->NextRow());
 
     m_scriptMaps[scriptType] = std::make_shared<ScriptMapMapName>(scripts);
 
@@ -1203,13 +1207,13 @@ void ScriptMgr::LoadDbScriptStrings()
 
 void ScriptMgr::LoadDbScriptRandomTemplates()
 {
-    QueryResult* result = WorldDatabase.Query("SELECT id, type, target_id, chance FROM dbscript_random_templates");
+    auto queryResult = WorldDatabase.Query("SELECT id, type, target_id, chance FROM dbscript_random_templates");
 
-    if (result)
+    if (queryResult)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             uint32 id = fields[0].GetUInt32();
             int32 type = fields[1].GetUInt32();
@@ -1226,9 +1230,7 @@ void ScriptMgr::LoadDbScriptRandomTemplates()
             else
                 sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses invalid type (%u). Won't be used.", id, type);
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
     }
 }
 
@@ -2126,10 +2128,9 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (uint32 randomField = urand(0, filledCount))               // Random selection resulted in one of the dataint fields
                     spellId = m_script->textId[randomField - 1];
 
-            Unit* castTarget = static_cast<Unit*>(pTarget);
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && castTarget == pSource)
-                castTarget = nullptr; // TODO: Add mechanism to opt not sending target
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX_EXCLUDE_CASTER) && pTarget == pSource)
+                pTarget = nullptr; // TODO: Add mechanism to opt not sending target
 
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->IsGameObject())
@@ -2137,13 +2138,29 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (LogIfNotUnit(pTarget))
                     break;
 
-                static_cast<Unit*>(pTarget)->CastSpell(castTarget, spellId, TRIGGERED_OLD_TRIGGERED | TRIGGERED_DO_NOT_PROC, nullptr, nullptr, pSource->GetObjectGuid());
+                static_cast<Unit*>(pTarget)->CastSpell(static_cast<Unit*>(pTarget), spellId, TRIGGERED_OLD_TRIGGERED | TRIGGERED_DO_NOT_PROC, nullptr, nullptr, pSource->GetObjectGuid());
                 break;
             }
 
             if (LogIfNotUnit(pSource))
                 break;
-            static_cast<Unit*>(pSource)->CastSpell(castTarget, spellId, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
+
+            SpellCastTargets spellCastTargets;
+            if (pTarget)
+            {
+                if (pTarget->IsUnit())
+                  spellCastTargets.setUnitTarget(static_cast<Unit*>(pTarget));
+                else if (pTarget->IsGameObject())
+                    spellCastTargets.setGOTarget(static_cast<GameObject*>(pTarget));
+
+                if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+                    spellCastTargets.setDestination(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
+            }
+
+            if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+                spellCastTargets.setSource(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ());
+
+            static_cast<Unit*>(pSource)->CastSpell(spellCastTargets, spellInfo, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
             break;
         }
         case SCRIPT_COMMAND_PLAY_SOUND:                     // 16
@@ -2529,12 +2546,12 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 {
                     if (m_script->IsCreatureBuddy())
                     {
-                        if (pTarget && pTarget->IsUnit() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
+                        if (pTarget && pTarget->IsUnit() && pTarget->GetDbGuid() == m_script->searchRadiusOrGuid)
                             terminationBuddy = pTarget;
                     }
                     else
                     {
-                        if (pTarget && pTarget->IsGameObject() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
+                        if (pTarget && pTarget->IsGameObject() && pTarget->GetDbGuid() == m_script->searchRadiusOrGuid)
                             terminationBuddy = pTarget;
                     }
                 }

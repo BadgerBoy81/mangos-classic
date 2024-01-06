@@ -1472,24 +1472,22 @@ void Map::CreateInstanceData(bool load)
 
     if (load)
     {
-        // TODO: make a global storage for this
-        QueryResult* result;
+        std::unique_ptr<QueryResult> queryResult;
 
         if (Instanceable())
-            result = CharacterDatabase.PQuery("SELECT data FROM instance WHERE id = '%u'", i_InstanceId);
+            queryResult = CharacterDatabase.PQuery("SELECT data FROM instance WHERE id = '%u'", i_InstanceId);
         else
-            result = CharacterDatabase.PQuery("SELECT data FROM world WHERE map = '%u'", GetId());
+            queryResult = CharacterDatabase.PQuery("SELECT data FROM world WHERE map = '%u'", GetId());
 
-        if (result)
+        if (queryResult)
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             const char* data = fields[0].GetString();
             if (data)
             {
                 DEBUG_LOG("Loading instance data for `%s` (Map: %u Instance: %u)", sScriptDevAIMgr.GetScriptName(i_script_id), GetId(), i_InstanceId);
                 i_data->Load(data);
             }
-            delete result;
         }
         else
         {
@@ -1867,7 +1865,23 @@ void BattleGroundMap::Update(const uint32& diff)
 {
     Map::Update(diff);
 
-    GetBG()->Update(diff);
+    if (!m_bg->GetPlayersSize())
+    {
+        // BG is empty
+        // if there are no players invited, delete BG
+        // this will delete arena or bg object, where any player entered
+        // [[   but if you use battleground object again (more battles possible to be played on 1 instance)
+        //      then this condition should be removed and code:
+        //      if (!GetInvitedCount(HORDE) && !GetInvitedCount(ALLIANCE))
+        //          this->AddToFreeBGObjectsQueue(); // not yet implemented
+        //      should be used instead of current
+        // ]]
+        // BattleGround Template instance cannot be updated, because it would be deleted
+        if (!m_bg->GetInvitedCount(HORDE) && !m_bg->GetInvitedCount(ALLIANCE))
+            delete m_bg;
+    }
+    else
+        m_bg->Update(diff);
 }
 
 BattleGroundPersistentState* BattleGroundMap::GetPersistanceState() const
@@ -2261,6 +2275,24 @@ std::vector<GameObject*> const* Map::GetGameObjects(uint32 stringId) const
         return nullptr;
 
     return &(itr->second.gameobjects);
+}
+
+WorldObject* Map::GetWorldObject(std::string stringId) const
+{
+    auto objects = GetWorldObjects(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
+}
+
+Creature* Map::GetCreature(std::string stringId) const
+{
+    auto objects = GetCreatures(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
+}
+
+GameObject* Map::GetGameObject(std::string stringId) const
+{
+    auto objects = GetGameObjects(stringId);
+    return objects && !objects->empty() ? objects->front() : nullptr;
 }
 
 void Map::AddDbGuidObject(WorldObject* obj)

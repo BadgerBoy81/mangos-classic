@@ -1304,7 +1304,7 @@ class Player : public Unit
                 SetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot2 + i, temp1);
             }
         }
-        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
+        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry) const;
         void AreaExploredOrEventHappens(uint32 questId);
         void ItemAddedQuestCheck(uint32 entry, uint32 count);
         void ItemRemovedQuestCheck(uint32 entry, uint32 count);
@@ -2190,7 +2190,7 @@ class Player : public Unit
         virtual void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
         void RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32>* spellAlreadySent = nullptr);
         void SendClearCooldown(uint32 spell_id, Unit* target) const;
-        void _LoadSpellCooldowns(QueryResult* result);
+        void _LoadSpellCooldowns(std::unique_ptr<QueryResult> queryResult);
         void _SaveSpellCooldowns();
 
         template <typename F>
@@ -2256,22 +2256,22 @@ class Player : public Unit
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-        void _LoadActions(QueryResult* result);
-        void _LoadAuras(QueryResult* result, uint32 timediff);
-        void _LoadBoundInstances(QueryResult* result);
-        void _LoadHonorCP(QueryResult* result);
-        void _LoadInventory(QueryResult* result, uint32 timediff);
-        void _LoadItemLoot(QueryResult* result);
-        void _LoadMails(QueryResult* result);
-        void _LoadMailedItems(QueryResult* result);
-        void _LoadQuestStatus(QueryResult* result);
-        void _LoadWeeklyQuestStatus(QueryResult* result);
-        void _LoadGroup(QueryResult* result);
-        void _LoadSkills(QueryResult* result);
-        void _LoadSpells(QueryResult* result);
-        bool _LoadHomeBind(QueryResult* result);
-        void _LoadBGData(QueryResult* result);
-        void _LoadForgottenSkills(QueryResult* result);
+        void _LoadActions(std::unique_ptr<QueryResult> queryResult);
+        void _LoadAuras(std::unique_ptr<QueryResult> queryResult, uint32 timediff);
+        void _LoadBoundInstances(std::unique_ptr<QueryResult> queryResult);
+        void _LoadHonorCP(std::unique_ptr<QueryResult> queryResult);
+        void _LoadInventory(std::unique_ptr<QueryResult> queryResult, uint32 timediff);
+        void _LoadItemLoot(std::unique_ptr<QueryResult> queryResult);
+        void _LoadMails(std::unique_ptr<QueryResult> queryResult);
+        void _LoadMailedItems(std::unique_ptr<QueryResult> queryResult);
+        void _LoadQuestStatus(std::unique_ptr<QueryResult> queryResult);
+        void _LoadWeeklyQuestStatus(std::unique_ptr<QueryResult> queryResult);
+        void _LoadGroup(std::unique_ptr<QueryResult> queryResult);
+        void _LoadSkills(std::unique_ptr<QueryResult> queryResult);
+        void _LoadSpells(std::unique_ptr<QueryResult> queryResult);
+        bool _LoadHomeBind(std::unique_ptr<QueryResult> queryResult);
+        void _LoadBGData(std::unique_ptr<QueryResult> queryResult);
+        void _LoadForgottenSkills(std::unique_ptr<QueryResult> queryResult);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
         void _LoadCreatedInstanceTimers();
         void _SaveNewInstanceIdTimer();
@@ -2313,6 +2313,8 @@ class Player : public Unit
 
         inline uint32 GetMirrorTimerMaxDuration(MirrorTimer::Type timer) const;
         inline SpellAuraHolder const* GetMirrorTimerBuff(MirrorTimer::Type timer) const;
+
+        uint32 getCorpseReclaimDelayHelper(time_t deathExpirationTime, time_t time, bool pvp) const;
 
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/

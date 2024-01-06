@@ -553,6 +553,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_UINT32_INSTANCE_RESET_TIME_HOUR, "Instance.ResetTimeHour", 4);
     setConfig(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY,    "Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS);
+    setConfig(CONFIG_BOOL_DISABLE_INSTANCE_RELOCATE, "Instance.DisableRelocate", false);
 
     setConfigMinMax(CONFIG_UINT32_MAX_PRIMARY_TRADE_SKILL, "MaxPrimaryTradeSkill", 2, 0, 10);
 
@@ -1651,7 +1652,7 @@ namespace MaNGOS
 
                 while (char* line = lineFromMessage(pos))
                 {
-                    auto data = std::unique_ptr<WorldPacket>(new WorldPacket());
+                    auto data = std::make_unique<WorldPacket>();
                     ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, line);
                     data_list.push_back(std::move(data));
                 }
@@ -1868,7 +1869,7 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
     std::string safe_author = author;
     LoginDatabase.escape_string(safe_author);
 
-    QueryResult* resultAccounts;                            // used for kicking
+    std::unique_ptr<QueryResult> resultAccounts;  // used for kicking
 
     ///- Update the database with ban information
     switch (mode)
@@ -1917,7 +1918,6 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
     }
     while (resultAccounts->NextRow());
 
-    delete resultAccounts;
     return BAN_SUCCESS;
 }
 
@@ -2105,8 +2105,8 @@ void World::ServerMaintenanceStart()
 
 void World::InitServerMaintenanceCheck()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT NextMaintenanceDate FROM saved_variables");
-    if (!result)
+    auto queryResult = CharacterDatabase.Query("SELECT NextMaintenanceDate FROM saved_variables");
+    if (!queryResult)
     {
         DEBUG_LOG("Maintenance date not found in SavedVariables, reseting it now.");
         uint32 mDate = GetDateLastMaintenanceDay();
@@ -2115,8 +2115,7 @@ void World::InitServerMaintenanceCheck()
     }
     else
     {
-        m_NextMaintenanceDate = (*result)[0].GetUInt64();
-        delete result;
+        m_NextMaintenanceDate = (*queryResult)[0].GetUInt64();
     }
 
     if (m_NextMaintenanceDate <= GetDateToday())
@@ -2182,11 +2181,11 @@ void World::_UpdateRealmCharCount(QueryResult* resultCharCount, uint32 accountId
 
 void World::InitWeeklyQuestResetTime()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT NextWeeklyQuestResetTime FROM saved_variables");
-    if (!result)
+    auto queryResult = CharacterDatabase.Query("SELECT NextWeeklyQuestResetTime FROM saved_variables");
+    if (!queryResult)
         m_NextWeeklyQuestReset = time_t(time(nullptr));        // game time not yet init
     else
-        m_NextWeeklyQuestReset = time_t((*result)[0].GetUInt64());
+        m_NextWeeklyQuestReset = time_t((*queryResult)[0].GetUInt64());
 
     // generate time by config
     time_t curTime = time(nullptr);
@@ -2208,30 +2207,26 @@ void World::InitWeeklyQuestResetTime()
     // normalize reset time
     m_NextWeeklyQuestReset = m_NextWeeklyQuestReset < curTime ? nextWeekResetTime - WEEK : nextWeekResetTime;
 
-    if (!result)
+    if (!queryResult)
         CharacterDatabase.PExecute("INSERT INTO saved_variables (NextWeeklyQuestResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextWeeklyQuestReset));
-    else
-        delete result;
 }
 
 void World::LoadSpamRecords(bool reload)
 {
-    QueryResult* result = WorldDatabase.Query("SELECT record FROM spam_records");
+    auto queryResult = WorldDatabase.Query("SELECT record FROM spam_records");
 
-    if (result)
+    if (queryResult)
     {
         if (reload)
             m_spamRecords.clear();
 
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             std::string record = fields[0].GetCppString();
 
             m_spamRecords.push_back(record);
-        } while (result->NextRow());
-
-        delete result;
+        } while (queryResult->NextRow());
     }
 }
 
@@ -2288,15 +2283,13 @@ void World::SetOnlinePlayer(Team team, uint8 race, uint8 plClass, bool apply)
 
 void World::LoadDBVersion()
 {
-    QueryResult* result = WorldDatabase.Query("SELECT version, creature_ai_version FROM db_version LIMIT 1");
-    if (result)
+    auto queryResult = WorldDatabase.Query("SELECT version, creature_ai_version FROM db_version LIMIT 1");
+    if (queryResult)
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         m_DBVersion              = fields[0].GetCppString();
         m_CreatureEventAIVersion = fields[1].GetCppString();
-
-        delete result;
     }
 
     if (m_DBVersion.empty())
@@ -2565,11 +2558,11 @@ void World::LoadGraveyardZones()
     // query map_id | (1 << 31) instead.
     auto& graveyardMap = GetGraveyardManager().GetGraveyardMap();
 
-    QueryResult* result = WorldDatabase.Query("SELECT id,ghost_loc,link_kind,faction FROM game_graveyard_zone");
+    auto queryResult = WorldDatabase.Query("SELECT id,ghost_loc,link_kind,faction FROM game_graveyard_zone");
 
     uint32 count = 0;
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -2578,14 +2571,14 @@ void World::LoadGraveyardZones()
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
         ++count;
         bar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         uint32 safeLocId = fields[0].GetUInt32();
         uint32 locId = fields[1].GetUInt32();
@@ -2635,9 +2628,7 @@ void World::LoadGraveyardZones()
             data.team = Team(team);
             graveyardMap.insert(GraveYardMap::value_type(locKey, data));
         }
-    } while (result->NextRow());
-
-    delete result;
+    } while (queryResult->NextRow());
 
     sLog.outString(">> Loaded %u graveyard-zone links", count);
     sLog.outString();

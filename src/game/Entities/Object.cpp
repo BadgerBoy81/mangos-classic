@@ -1949,8 +1949,15 @@ void WorldObject::AddToWorld()
 
 void WorldObject::RemoveFromWorld()
 {
-    if (m_isOnEventNotified)
-        m_currMap->RemoveFromOnEventNotified(this);
+    if (IsInWorld())
+    {
+        if (m_isOnEventNotified)
+            m_currMap->RemoveFromOnEventNotified(this);
+
+        if (!m_stringIds.empty())
+            for (uint32 stringId : m_stringIds)
+                m_currMap->RemoveStringIdObject(stringId, this);
+    }
 
     if (!m_stringIds.empty())
         for (uint32 stringId : m_stringIds)
@@ -2072,8 +2079,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
                 creature->SetPower(POWER_MANA, templateData->curMana);
             if (templateData->modelId > 0)
                 creature->SetDisplayId(templateData->modelId);
-            if (templateData->equipmentId)
-                creature->LoadEquipment(templateData->equipmentId == -1 ? 0 : templateData->equipmentId, true);
+            if (templateData->equipmentId != -1)
+                creature->LoadEquipment(templateData->equipmentId, true);
             if (templateData->curHealth > 1)
                 creature->SetHealth(templateData->curHealth);
             if (templateData->curMana > 0)
