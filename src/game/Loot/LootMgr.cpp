@@ -439,7 +439,7 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
 #ifdef BUILD_PLAYERBOT
     if (itemProto->MaxCount > 0 && player->IsBot() && player->HasItemCount(itemProto->ItemId, itemProto->MaxCount, true))
     {
-        sLog.outString("%s is bot: %s and has max of %s", player->GetName(), player->IsBot() ? "true" : "false", itemProto->Name1);
+        //sLog.outString("%s is bot: %s and has max of %s", player->GetName(), player->IsBot() ? "true" : "false", itemProto->Name1);
         return false;
     }
 #endif
@@ -2350,8 +2350,16 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
         for (auto& itr : ExplicitlyChanced)
         {
             if (pGroup == nullptr ||
-                (ObjectMgr::GetItemPrototype(itr.itemid) && ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass == -1) ||
-                pGroup->HasClass(ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass))
+                (
+                    ObjectMgr::GetItemPrototype(itr.itemid) &&
+                    pGroup->HasClass(ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass) &&
+                    pGroup->CanLootSetItem(
+                        itr.itemid,
+                        ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass,
+                        ObjectMgr::GetItemPrototype(itr.itemid)->ItemSet,
+                        ObjectMgr::GetItemPrototype(itr.itemid)->Bonding == 1
+                    )
+                ))
             {
                 lootStoreItemVector.push_back(&itr);
             }
@@ -2390,8 +2398,16 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
         for (auto& itr : EqualChanced)
         {
             if (pGroup == nullptr ||
-                (ObjectMgr::GetItemPrototype(itr.itemid) && ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass == -1) ||
-                pGroup->HasClass(ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass))
+                (
+                    ObjectMgr::GetItemPrototype(itr.itemid) &&  
+                    pGroup->HasClass(ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass) &&
+                    pGroup->CanLootSetItem(
+                        itr.itemid,
+                        ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass,
+                        ObjectMgr::GetItemPrototype(itr.itemid)->ItemSet,
+                        ObjectMgr::GetItemPrototype(itr.itemid)->Bonding == 1
+                    )
+                ))
             {
                 lootStoreItemVector.push_back(&itr);
             }
