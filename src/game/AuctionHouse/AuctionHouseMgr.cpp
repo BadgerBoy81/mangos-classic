@@ -36,6 +36,10 @@
 
 #include "Policies/Singleton.h"
 
+#ifdef BUILD_AHBOT
+#include "AuctionHouseBot/AuctionHouseBot.h"
+#endif
+
 INSTANTIATE_SINGLETON_1(AuctionHouseMgr);
 
 AuctionHouseMgr::AuctionHouseMgr()
@@ -216,6 +220,16 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction)
     }
 
     ObjectGuid owner_guid = ObjectGuid(HIGHGUID_PLAYER, auction->owner);
+#ifdef BUILD_AHBOT
+    if (owner_guid == sAuctionHouseBot.GetAuctionOwner())
+    {
+        CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", auction->itemGuidLow);
+        RemoveAItem(auction->itemGuidLow);                  // we have to remove the item, before we delete it !!
+        auction->itemGuidLow = 0;
+        delete pItem;
+        return;
+    }
+#endif
     Player* owner = sObjectMgr.GetPlayer(owner_guid);
 
     uint32 owner_accId = 0;
@@ -466,7 +480,7 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(Unit* unit)
     {
         if (unit->GetTypeId() == TYPEID_UNIT)
         {
-            // FIXME: found way for proper auctionhouse selection by another way
+            // FIXME: found way for proper auction house selection by another way
             // AuctionHouse.dbc have faction field with _player_ factions associated with auction house races.
             // but no easy way convert creature faction to player race faction for specific city
             uint32 factionTemplateId = unit->GetFaction();
@@ -658,13 +672,18 @@ AuctionEntry* AuctionHouseObject::AddAuction(AuctionHouseEntry const* auctionHou
 {
     uint32 auction_time = uint32(etime * sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_TIME));
 
+    uint32 defaultAuctionOwner = 0;
+#ifdef BUILD_AHBOT
+    defaultAuctionOwner = sAuctionHouseBot.GetAuctionOwner();
+#endif
+
     AuctionEntry* AH = new AuctionEntry;
     AH->Id = sObjectMgr.GenerateAuctionID();
     AH->itemGuidLow = newItem->GetObjectGuid().GetCounter();
     AH->itemTemplate = newItem->GetEntry();
     AH->itemCount = newItem->GetCount();
     AH->itemRandomPropertyId = newItem->GetItemRandomPropertyId();
-    AH->owner = pl ? pl->GetGUIDLow() : 7;
+    AH->owner = pl ? pl->GetGUIDLow() : defaultAuctionOwner;
     AH->startbid = bid;
     AH->bidder = 0;
     AH->bid = 0;

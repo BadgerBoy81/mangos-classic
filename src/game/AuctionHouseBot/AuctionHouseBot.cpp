@@ -131,6 +131,9 @@ void AuctionHouseBot::Initialize()
         // buy item value
         m_buyValue = GetMinMaxConfig("AuctionHouseBot.Buy.Value", 0, 200, 90);
 
+        // bot character
+        m_auctionOwnerGuid = m_ahBotCfg.GetIntDefault("AuctionHouseBot.General.AuctionOwner", m_defaultAuctionOwnerGuid);
+
         // overridden items
         auto queryResult = CharacterDatabase.PQuery("SELECT item, value, add_chance, min_amount, max_amount FROM ahbot_items");
         if (queryResult)
