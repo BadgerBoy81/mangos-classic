@@ -387,6 +387,8 @@ class PlayerbotAI
         // extracts gameobject info from link
         void extractGOinfo(const std::string& text, BotObjectList& m_lootTargets) const;
 
+        uint32 extractEntryFromItemLink(const std::string& text) const;
+
         // finds items in bots equipment and adds them to foundItemList, removes found items from itemIdSearchList
         void findItemsInEquip(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const;
         // finds items in bots inventory and adds them to foundItemList, removes found items from itemIdSearchList
@@ -601,6 +603,7 @@ class PlayerbotAI
         void _HandleCommandEquip(std::string& text, Player& fromPlayer);
         void _HandleCommandFind(std::string& text, Player& fromPlayer);
         void _HandleCommandGet(std::string& text, Player& fromPlayer);
+        void _HandleCommandActivate(std::string& text, Player& fromPlayer);
         void _HandleCommandCollect(std::string& text, Player& fromPlayer);
         void _HandleCommandQuest(std::string& text, Player& fromPlayer);
         void _HandleCommandPet(std::string& text, Player& fromPlayer);
