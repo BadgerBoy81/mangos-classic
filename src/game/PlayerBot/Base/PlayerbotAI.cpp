@@ -4018,13 +4018,13 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     }
 
     //if master is unmounted, unmount the bot
-    if (!GetMaster()->IsMounted() && m_bot->IsMounted())
-    {
-        WorldPacket emptyPacket;
-        m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+    //if (!GetMaster()->IsMounted() && m_bot->IsMounted())
+    //{
+    //    WorldPacket emptyPacket;
+    //    m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
 
-        return;
-    }
+    //    return;
+    //}
 
     // handle combat (either self/master/group in combat, or combat state and valid target)
     if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat) ||  m_ScenarioType == SCENARIO_PVP_DUEL)

@@ -772,11 +772,11 @@ void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
                         }
                     }
                     // If master dismounted, do so
-                    else if (!GetMaster()->IsMounted() && bot->IsMounted())    // only execute code if master is the one who dismounted
-                    {
-                        WorldPacket emptyPacket;
-                        bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
-                    }
+                    //else if (!GetMaster()->IsMounted() && bot->IsMounted())    // only execute code if master is the one who dismounted
+                    //{
+                    //    WorldPacket emptyPacket;
+                    //    bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+                    //}
                 }
                 break;
             }
