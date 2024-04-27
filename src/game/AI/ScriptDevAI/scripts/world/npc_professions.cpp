@@ -270,11 +270,6 @@ void ProfessionUnlearnSpells(Player* pPlayer, uint32 type)
 # start menues blacksmith
 ###*/
 
-bool HasWeaponSub(Player* pPlayer)
-{
-    return pPlayer->HasSpell(S_HAMMER) || pPlayer->HasSpell(S_AXE) || pPlayer->HasSpell(S_SWORD);
-}
-
 bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->isQuestGiver())
@@ -321,22 +316,22 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
         switch (eCreature)
         {
             case N_TRAINER_HAMMER:
-                if (!HasWeaponSub(pPlayer))
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_HAMMER, GOSSIP_SENDER_LEARN, GOSSIP_ACTION_INFO_DEF + 5);
                 if (pPlayer->HasSpell(S_HAMMER))
                     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_UNLEARN_HAMMER, GOSSIP_SENDER_UNLEARN, GOSSIP_ACTION_INFO_DEF + 8);
+                else
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_HAMMER, GOSSIP_SENDER_LEARN, GOSSIP_ACTION_INFO_DEF + 5);
                 break;
             case N_TRAINER_AXE:
-                if (!HasWeaponSub(pPlayer))
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_AXE, GOSSIP_SENDER_LEARN, GOSSIP_ACTION_INFO_DEF + 6);
                 if (pPlayer->HasSpell(S_AXE))
                     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_UNLEARN_AXE, GOSSIP_SENDER_UNLEARN, GOSSIP_ACTION_INFO_DEF + 9);
+                else
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_AXE, GOSSIP_SENDER_LEARN, GOSSIP_ACTION_INFO_DEF + 6);
                 break;
             case N_TRAINER_SWORD:
-                if (!HasWeaponSub(pPlayer))
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_SWORD, GOSSIP_SENDER_LEARN, GOSSIP_ACTION_INFO_DEF + 7);
                 if (pPlayer->HasSpell(S_SWORD))
                     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_UNLEARN_SWORD, GOSSIP_SENDER_UNLEARN, GOSSIP_ACTION_INFO_DEF + 10);
+                else
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_SWORD, GOSSIP_SENDER_LEARN, GOSSIP_ACTION_INFO_DEF + 7);
                 break;
         }
     }
