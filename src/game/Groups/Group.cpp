@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#include<cmath>
 
 #include "Common.h"
 #include "Server/Opcodes.h"
@@ -1222,6 +1223,45 @@ void Group::ChangeMembersGroup(ObjectGuid guid, uint8 group)
     else
         // This methods handles itself groupcounter decrease
         ChangeMembersGroup(player, group);
+}
+
+bool Group::HasClass(uint32 allowedClass) const
+{
+    if (allowedClass == -1 || allowedClass == 32767 || allowedClass == 2047)
+    {
+        return true;
+    }
+    for (auto itr = this->GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        if ((uint32)pow(2, itr->getSource()->getClass() - 1) & allowedClass)
+            return true;
+    }
+
+    sLog.outString("Loot not lootable by any class in group");
+    return false;
+}
+
+bool Group::CanLootSetItem(uint32 itemId, uint32 itemClassMask, uint32 itemSet, bool isBop) const
+{
+    if (itemSet == 0 || !isBop)
+    {
+        return true;
+    }
+
+    for (auto itr = this->GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        if ((uint32)pow(2, itr->getSource()->getClass() - 1) & itemClassMask)
+        {
+            sLog.outString("1: Check for  %s in %s's inventory", ObjectMgr::GetItemPrototype(itemId)->Name1, itr->getSource()->GetName());
+            if (!itr->getSource()->HasItemCount(itemId, 1, true))
+            {
+                sLog.outString("2: %s has no %s in inventory or bank", itr->getSource()->GetName(), ObjectMgr::GetItemPrototype(itemId)->Name1);
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 // only for online members
