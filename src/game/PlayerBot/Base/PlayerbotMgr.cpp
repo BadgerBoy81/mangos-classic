@@ -64,6 +64,8 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
     m_confCollectSkin = botConfig.GetBoolDefault("PlayerbotAI.Collect.Skin", true);
     m_confCollectObjects = botConfig.GetBoolDefault("PlayerbotAI.Collect.Objects", true);
     m_confCollectDistanceMax = botConfig.GetIntDefault("PlayerbotAI.Collect.DistanceMax", 50);
+    m_warlockMaxSoulShards = botConfig.GetIntDefault("PlayerbotAI.Warlock.MaxShards", 15);
+    m_warlockMinBagspaceForCreatingShards = botConfig.GetIntDefault("PlayerbotAI.Warlock.MinBagspaceForCreatingShards", 15);
     if (m_confCollectDistanceMax > 100)
     {
         sLog.outError("Playerbot: PlayerbotAI.Collect.DistanceMax higher than allowed. Using 100");

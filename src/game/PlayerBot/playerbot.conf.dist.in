@@ -89,3 +89,12 @@ PlayerbotAI.Collect.Objects = 1
 PlayerbotAI.Collect.DistanceMax = 50
 PlayerbotAI.Collect.Distance = 25
 PlayerbotAI.SellGarbage = 0
+
+##################################
+#                                #
+#    Class specific settings     #
+#                                #
+##################################
+
+PlayerbotAI.Warlock.MaxShards = 15
+PlayerbotAI.Warlock.MinBagspaceForCreatingShards = 15
