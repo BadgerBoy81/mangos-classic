@@ -834,6 +834,14 @@ void PlayerbotMgr::Stay()
     }
 }
 
+void PlayerbotMgr::Unmount(const Aura* aura)
+{
+    for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr)
+    {
+        Player* bot = itr->second;
+        bot->Unmount(aura);
+    }
+}
 
 // Playerbot mod: logs out a Playerbot.
 void PlayerbotMgr::LogoutPlayerBot(ObjectGuid guid)

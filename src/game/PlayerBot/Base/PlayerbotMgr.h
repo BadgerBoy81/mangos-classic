@@ -66,6 +66,7 @@ class PlayerbotMgr
         void RemoveAllBotsFromGroup();
         void OnBotLogin(Player* const bot);
         void Stay();
+        void Unmount(const Aura* aura);
 
     public:
         // config variables

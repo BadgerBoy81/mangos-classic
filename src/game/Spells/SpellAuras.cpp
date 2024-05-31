@@ -1707,6 +1707,10 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
     else
     {
         target->Unmount(this);
+#ifdef BUILD_DEPRECATED_PLAYERBOT
+        if (target->IsPlayer() && ((Player*)(target))->GetPlayerbotMgr())
+            ((Player*)(target))->GetPlayerbotMgr()->Unmount(this);
+#endif
     }
 }
 
