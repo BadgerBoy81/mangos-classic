@@ -7188,6 +7188,7 @@ void PlayerbotAI::_HandleCommandUse(std::string& text, Player& fromPlayer)
     std::list<Item*> itemList;
     extractItemIds(text, itemIds);
     findItemsInInv(itemIds, itemList);
+    findItemsInEquip(itemIds, itemList);
     // set target
     Unit* unit = ObjectAccessor::GetUnit(*m_bot, fromPlayer.GetSelectionGuid());
 
