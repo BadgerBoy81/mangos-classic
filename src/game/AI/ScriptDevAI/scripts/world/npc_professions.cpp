@@ -473,17 +473,31 @@ return true;
 # start menues leatherworking
 ###*/
 
-bool IsEligibleSpecializeLW(Player* pPlayer)
+bool IsEligibleSpecializeLW(Player* pPlayer, uint32 trainerType)
 {
-    // Allow re-learn specialization as long as player is not specialized currently and has completed any specialization quest
-    if ((!pPlayer->HasSpell(S_DRAGON) && !pPlayer->HasSpell(S_ELEMENTAL) && !pPlayer->HasSpell(S_TRIBAL))
-        && (pPlayer->GetQuestRewardStatus(Q_DRAGON_ALLY)
-            || pPlayer->GetQuestRewardStatus(Q_DRAGON_HORDE)
-            || pPlayer->GetQuestRewardStatus(Q_ELEMENTAL_ALLY)
-            || pPlayer->GetQuestRewardStatus(Q_ELEMENTAL_HORDE)
-            || pPlayer->GetQuestRewardStatus(Q_TRIBAL_ALLY)
-            || pPlayer->GetQuestRewardStatus(Q_TRIBAL_HORDE)))
-        return true;
+    switch (trainerType)
+    {
+        case N_TRAINER_DRAGON2:
+            if (!pPlayer->HasSpell(S_DRAGON)
+                && (pPlayer->GetQuestRewardStatus(Q_DRAGON_ALLY)
+                    || pPlayer->GetQuestRewardStatus(Q_DRAGON_HORDE)))
+                return true;
+            break;
+        case N_TRAINER_ELEMENTAL2:
+            if (!pPlayer->HasSpell(S_ELEMENTAL)
+                && (pPlayer->GetQuestRewardStatus(Q_ELEMENTAL_ALLY)
+                    || pPlayer->GetQuestRewardStatus(Q_ELEMENTAL_HORDE)))
+                return true;
+            break;
+        case N_TRAINER_TRIBAL2:
+            if (!pPlayer->HasSpell(S_TRIBAL)
+                && (pPlayer->GetQuestRewardStatus(Q_TRIBAL_ALLY)
+                    || pPlayer->GetQuestRewardStatus(Q_TRIBAL_HORDE)))
+                return true;
+            break;
+        default:
+            return false;
+    }
     return false;
 }
 
@@ -508,7 +522,7 @@ bool GossipHello_npc_prof_leather(Player* pPlayer, Creature* pCreature)
                     if (pCreature->isTrainer())
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
                 }
-                else if (IsEligibleSpecializeLW(pPlayer))
+                else if (IsEligibleSpecializeLW(pPlayer, N_TRAINER_DRAGON2))
                     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_DRAGON, GOSSIP_SENDER_CHECK, GOSSIP_ACTION_INFO_DEF + 2);
                 break;
             case N_TRAINER_ELEMENTAL1:
@@ -519,7 +533,7 @@ bool GossipHello_npc_prof_leather(Player* pPlayer, Creature* pCreature)
                     if (pCreature->isTrainer())
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
                 }
-                else if (IsEligibleSpecializeLW(pPlayer))
+                else if (IsEligibleSpecializeLW(pPlayer, N_TRAINER_ELEMENTAL2))
                     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_ELEMENTAL, GOSSIP_SENDER_CHECK, GOSSIP_ACTION_INFO_DEF + 4);
                 break;
             case N_TRAINER_TRIBAL1:
@@ -530,7 +544,7 @@ bool GossipHello_npc_prof_leather(Player* pPlayer, Creature* pCreature)
                     if (pCreature->isTrainer())
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
                 }
-                else if (IsEligibleSpecializeLW(pPlayer))
+                else if (IsEligibleSpecializeLW(pPlayer, N_TRAINER_TRIBAL2))
                     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LEARN_TRIBAL, GOSSIP_SENDER_CHECK, GOSSIP_ACTION_INFO_DEF + 6);
                 break;
         }
