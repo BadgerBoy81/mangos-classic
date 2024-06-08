@@ -1981,17 +1981,25 @@ Item* PlayerbotAI::FindBandage() const
     return nullptr;
 }
 
+static const uint32 uStoneExclusionIds[1] =
+{
+    ELEMENTIUM_ORE_ID
+};
+
 Item* PlayerbotAI::FindConsumable(uint32 displayId) const
 {
     // list out items in main backpack
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
     {
         Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+
         if (pItem)
         {
             const ItemPrototype* const pItemProto = pItem->GetProto();
 
-            if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
+            bool toBeExcluded = std::find(std::begin(uStoneExclusionIds), std::end(uStoneExclusionIds), pItemProto->ItemId) != std::end(uStoneExclusionIds);
+
+            if (toBeExcluded || !pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                 continue;
 
             if ((pItemProto->Class == ITEM_CLASS_CONSUMABLE || pItemProto->Class == ITEM_SUBCLASS_BANDAGE) && pItemProto->DisplayInfoID == displayId)
@@ -2010,7 +2018,9 @@ Item* PlayerbotAI::FindConsumable(uint32 displayId) const
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
 
-                    if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
+                    bool toBeExcluded = std::find(std::begin(uStoneExclusionIds), std::end(uStoneExclusionIds), pItemProto->ItemId) != std::end(uStoneExclusionIds);
+
+                    if (toBeExcluded || !pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK)
                         continue;
 
                     if ((pItemProto->Class == ITEM_CLASS_CONSUMABLE || pItemProto->Class == ITEM_SUBCLASS_BANDAGE) && pItemProto->DisplayInfoID == displayId)

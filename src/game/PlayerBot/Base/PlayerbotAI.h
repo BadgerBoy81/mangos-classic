@@ -74,6 +74,11 @@ enum NotableItems
     POWERFUL_SEAFORIUM_CHARGE      = 18594
 };
 
+enum ExclusionStoneId
+{
+    ELEMENTIUM_ORE_ID                   = 18562
+};
+
 enum SharpeningStoneDisplayId
 {
     ROUGH_SHARPENING_DISPLAYID          = 24673,
