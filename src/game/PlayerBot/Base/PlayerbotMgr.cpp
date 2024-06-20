@@ -1204,6 +1204,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         CharacterDatabase.DirectPExecute("UPDATE characters SET online = 0 WHERE guid = '%u'", guid.GetCounter());
         mgr->LogoutPlayerBot(guid);
         PSendSysMessage("Bot removed successfully.");
+        HandleListAccountPlayersCommand("");
     }
     else if (cmdStr == "co" || cmdStr == "combatorder")
     {

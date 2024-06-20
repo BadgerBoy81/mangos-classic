@@ -524,6 +524,13 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+#ifdef BUILD_DEPRECATED_PLAYERBOT 
+    static ChatCommand playerbotHandlerCommandTable[] =
+    {
+        { "list",          SEC_PLAYER,         false,  &ChatHandler::HandleListAccountPlayersCommand,   "", nullptr }
+    };
+#endif
+
     static ChatCommand npcCommandTable[] =
     {
         { "add",            SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcAddCommand,              "", nullptr },
@@ -1013,6 +1020,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "loot",           SEC_GAMEMASTER,     true,  nullptr,                                        "", lootCommandTable },
 #ifdef BUILD_DEPRECATED_PLAYERBOT
         { "bot",            SEC_PLAYER,         false, &ChatHandler::HandlePlayerbotCommand,           "", nullptr },
+        { "pbh\tpbh",       SEC_PLAYER,         false, nullptr,                                        "", playerbotHandlerCommandTable },
 #endif
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
