@@ -529,7 +529,7 @@ uint8 PlayerbotDruidAI::CheckForms()
 
     // if bot has healing orders always shift to humanoid form
     // regardless of spec
-    if (m_ai.IsHealer() || spec == DRUID_SPEC_RESTORATION)
+    if (m_ai.IsHealer() || spec == DRUID_SPEC_RESTORATION || !m_bot.GetPlayerbotAI()->GetClassAI()->ShapeShiftingIsActive())
     {
         if (m_bot.HasAura(CAT_FORM, EFFECT_INDEX_0))
         {
@@ -588,7 +588,7 @@ uint8 PlayerbotDruidAI::CheckForms()
             if (!m_bot.HasAura(THORNS))
                 return RETURN_FAIL_WAITINGONSELFBUFF;
 
-            if (CastSpell(BEAR))
+            if (m_bot.GetPlayerbotAI()->GetClassAI()->ShapeShiftingIsActive() && CastSpell(BEAR))
                 return RETURN_OK_SHIFTING;
             else
                 return RETURN_FAIL;
@@ -600,7 +600,7 @@ uint8 PlayerbotDruidAI::CheckForms()
                 if (m_bot.HasAura(CAT_FORM))
                     return RETURN_OK_NOCHANGE;
 
-                if (CastSpell(CAT_FORM))
+                if (m_bot.GetPlayerbotAI()->GetClassAI()->ShapeShiftingIsActive() && CastSpell(CAT_FORM))
                     return RETURN_OK_SHIFTING;
                 else
                     return RETURN_FAIL;
@@ -611,7 +611,7 @@ uint8 PlayerbotDruidAI::CheckForms()
                 if (m_bot.HasAura(BEAR))
                     return RETURN_OK_NOCHANGE;
 
-                if (CastSpell(BEAR))
+                if (m_bot.GetPlayerbotAI()->GetClassAI()->ShapeShiftingIsActive() && CastSpell(BEAR))
                     return RETURN_OK_SHIFTING;
                 else
                     return RETURN_FAIL;

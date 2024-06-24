@@ -83,6 +83,8 @@ class PlayerbotClassAI
         void SetWait(uint8 t) { m_WaitUntil = m_ai.CurrentTime() + t; }
         void ClearWait() { m_WaitUntil = 0; }
         //void SetWaitUntil(time_t t) { m_WaitUntil = t; }
+        bool ShapeShiftingIsActive() { return m_ShapeshitftingActive; }
+        void ToggleShapeShiftingIsActive() { m_ShapeshitftingActive = !m_ShapeshitftingActive; }
 
     protected:
         virtual CombatManeuverReturns DoFirstCombatManeuverPVE(Unit*);
@@ -112,6 +114,8 @@ class PlayerbotClassAI
         uint8 m_MinHealthPercentHealer;
         uint8 m_MinHealthPercentDPS;
         uint8 m_MinHealthPercentMaster;
+
+        bool m_ShapeshitftingActive;
 
         time_t m_WaitUntil;
 

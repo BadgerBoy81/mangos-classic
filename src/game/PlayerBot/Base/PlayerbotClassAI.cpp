@@ -33,6 +33,8 @@ PlayerbotClassAI::PlayerbotClassAI(Player& master, Player& bot, PlayerbotAI& ai)
     m_MinHealthPercentDPS    = 30;
     m_MinHealthPercentMaster = m_MinHealthPercentDPS;
 
+    m_ShapeshitftingActive = true;
+
     ClearWait();
 }
 PlayerbotClassAI::~PlayerbotClassAI() {}

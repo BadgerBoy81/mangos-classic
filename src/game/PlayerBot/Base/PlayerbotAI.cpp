@@ -6610,6 +6610,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("stats", input))
         _HandleCommandStats(input, fromPlayer);
 
+    else if(ExtractCommand("toggleShapeShifting", input))
+        _HandleCommandToggleShapeShifting();
+
     else
     {
         // if this looks like an item link, reward item it completed quest and talking to NPC
@@ -8486,6 +8489,14 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
     if (!text.empty())
         SendWhisper("Either that is not a valid command, or someone forgot to add it to my help journal. I mean seriously, they can't expect me to remember *all* this stuff, can they?", fromPlayer);
+}
+
+void PlayerbotAI::_HandleCommandToggleShapeShifting()
+{
+    if (m_bot->getClass() != CLASS_DRUID)
+        return;
+
+    m_bot->GetPlayerbotAI()->GetClassAI()->ToggleShapeShiftingIsActive();
 }
 
 std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::string sExplain, HELPERLINKABLES reqLink, bool bReqLinkMultiples, bool bCommandShort)
