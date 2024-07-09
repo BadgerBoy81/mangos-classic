@@ -47,6 +47,12 @@ static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] =
     CONFIG_FLOAT_RATE_DROP_ITEM_ARTIFACT,                   // ITEM_QUALITY_ARTIFACT
 };
 
+// Desecrated tokens from naxx for only dropping tokens if relevant for group classes and not duplicate 
+static uint32 TierSetTokenList[24] = {
+    // Desecrated tokens in vanilla Naxxramas
+    22349,22350,22351,22352,22353,22354,22355,22356,22357,22358,22359,22360,22361,22362,22363,22364,22365,22366,22367,22368,22369,22370,22371,22372
+};
+
 LootStore LootTemplates_Creature("creature_loot_template",     "creature entry",                 true);
 LootStore LootTemplates_Disenchant("disenchant_loot_template",   "item disenchant id",             true);
 LootStore LootTemplates_Fishing("fishing_loot_template",      "area id",                        true);
@@ -2374,7 +2380,8 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
                         itr.itemid,
                         ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass,
                         ObjectMgr::GetItemPrototype(itr.itemid)->ItemSet,
-                        ObjectMgr::GetItemPrototype(itr.itemid)->Bonding == 1
+                        ObjectMgr::GetItemPrototype(itr.itemid)->Bonding == 1,
+                        std::find(std::begin(TierSetTokenList), std::end(TierSetTokenList), itr.itemid) != std::end(TierSetTokenList)
                     )
                 ))
             {
@@ -2422,7 +2429,8 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
                         itr.itemid,
                         ObjectMgr::GetItemPrototype(itr.itemid)->AllowableClass,
                         ObjectMgr::GetItemPrototype(itr.itemid)->ItemSet,
-                        ObjectMgr::GetItemPrototype(itr.itemid)->Bonding == 1
+                        ObjectMgr::GetItemPrototype(itr.itemid)->Bonding == 1,
+                        std::find(std::begin(TierSetTokenList), std::end(TierSetTokenList), itr.itemid) != std::end(TierSetTokenList)
                     )
                 ))
             {

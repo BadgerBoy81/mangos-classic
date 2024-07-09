@@ -1241,9 +1241,9 @@ bool Group::HasClass(uint32 allowedClass) const
     return false;
 }
 
-bool Group::CanLootSetItem(uint32 itemId, uint32 itemClassMask, uint32 itemSet, bool isBop) const
+bool Group::CanLootSetItem(uint32 itemId, uint32 itemClassMask, uint32 itemSet, bool isBop, bool isInTierSetTokenList) const
 {
-    if (itemSet == 0 || !isBop)
+    if ((itemSet == 0 && !isInTierSetTokenList) || !isBop)
     {
         return true;
     }
