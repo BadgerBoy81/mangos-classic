@@ -383,7 +383,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
             {
                 if (m_shockOverloadTimer <= diff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TRIGGER_TESLAS) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_OVERLOAD) == CAST_OK)
                         m_shockOverloadTimer = 0;
                 }
                 else

@@ -490,7 +490,6 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
             m_auiEncounter[type] = data;
             break;
         case TYPE_GOTHIK:
-            m_auiEncounter[type] = data;
             switch (data)
             {
                 case IN_PROGRESS:
@@ -527,6 +526,7 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
                     StartNextDialogueText(NPC_THANE);
                     break;
             }
+            m_auiEncounter[type] = data;
             break;
         case TYPE_FOUR_HORSEMEN:
         {
