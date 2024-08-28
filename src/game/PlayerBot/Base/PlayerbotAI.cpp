@@ -2256,12 +2256,11 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
             m_targetChanged = true;
             return;
         }
-        else
-        {
-            if (!IsNeutralized(m_targetCombat) && m_ignoreNeutralizeEffect)
-                m_ignoreNeutralizeEffect = false;                           // target is no longer neutralised, clear ignore order
-            return;                                                         // keep on attacking target
-        }
+
+        if (!IsNeutralized(m_targetCombat) && m_ignoreNeutralizeEffect)
+            m_ignoreNeutralizeEffect = false;                           // target is no longer neutralised, clear ignore order
+
+        return;                                                         // keep on attacking target
     }
 
     // No target for now, try to get one
