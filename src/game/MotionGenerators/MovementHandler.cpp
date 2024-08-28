@@ -462,12 +462,13 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
                           move_type_name[move_type], _player->GetName(), mover->GetSpeed(move_type), newspeed);
             mover->SetSpeedRate(move_type, _player->GetSpeedRate(move_type), true);
         }
-        else                                                // must be lesser - cheating
-        {
-            BASIC_LOG("Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
-                      _player->GetName(), _player->GetSession()->GetAccountId(), mover->GetSpeed(move_type), newspeed);
-            _player->GetSession()->KickPlayer();
-        }
+        // kick in razor gore
+        //else                                                // must be lesser - cheating
+        //{
+        //    BASIC_LOG("Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
+        //              _player->GetName(), _player->GetSession()->GetAccountId(), mover->GetSpeed(move_type), newspeed);
+        //    _player->GetSession()->KickPlayer();
+        //}
     }
 }
 
