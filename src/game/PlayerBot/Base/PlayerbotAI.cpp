@@ -561,6 +561,14 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
     if (pProto->MaxCount > 0 && m_bot->HasItemCount(itemid, pProto->MaxCount, true))
         return false;
 
+    // class wrong item skip only for bindable case
+    if ((pProto->AllowableClass & m_bot->getClassMask()) == 0) // && pProto->Bonding == BIND_WHEN_PICKED_UP)
+        return false;
+
+    // race wrong
+    if ((pProto->AllowableRace & m_bot->getRaceMask()) == 0)
+        return false;
+
     // quest related items
     if (pProto->StartQuest > 0 && HasCollectFlag(COLLECT_FLAG_QUEST))
         return true;
@@ -2241,7 +2249,8 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
     {
         // This is a hack. For some reason the player bots target is dereferenced between fetching it and trying to attack it.
         // Thee real solution would be to see if that could be avoided in a better way
-        if (m_targetCombat->GetDbGuid() > 1000000)
+        // failed ones seems to ahve this magic number
+        if (m_targetCombat->GetDbGuid() == 3722304989 || m_targetCombat->GetDbGuid() == 0)
         {
             //sLog.outString("Weird value combat target dbGuid: %i", m_targetCombat->GetDbGuid());
             //sLog.outString("setting combat target to nullptr");
@@ -4045,13 +4054,11 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     }
 
     //if master is unmounted, unmount the bot
-    //if (!GetMaster()->IsMounted() && m_bot->IsMounted())
-    //{
-    //    WorldPacket emptyPacket;
-    //    m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
-
-    //    return;
-    //}
+    if (!GetMaster()->IsMounted() && m_bot->IsMounted())
+    {
+        m_bot->Unmount();
+        return;
+    }
 
     // handle combat (either self/master/group in combat, or combat state and valid target)
     if (IsInCombat() || (m_botState == BOTSTATE_COMBAT && m_targetCombat) ||  m_ScenarioType == SCENARIO_PVP_DUEL)
@@ -4112,6 +4119,13 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     // if commanded to follow master and not already following master then follow master
     if (!m_bot->IsInCombat() && m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
         return MovementReset();
+
+    // add profession specific gameobjects to loot list
+    // only do if no objects allready entered
+    if (m_collectObjects.empty())
+    {
+        sLog.outString("We are currently not looking for any object to loot");
+    }
 
     // do class specific non combat actions
     if (GetClassAI() && !m_bot->IsMounted() && !IsRegenerating())

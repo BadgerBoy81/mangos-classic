@@ -284,7 +284,7 @@ class CharacterHandler
             masterSession->GetPlayer()->GetPlayerbotMgr()->OnBotLogin(botSession->GetPlayer());
             char addonMessage[17] = "";
             sprintf(addonMessage, "pbhbotstatus;1;%d", botSession->GetPlayer()->GetGUID());
-            botSession->GetPlayer()->Say(addonMessage, LANG_ADDON);
+            masterSession->GetPlayer()->Say(addonMessage, LANG_ADDON);
         }
 #endif
 } chrHandler;
